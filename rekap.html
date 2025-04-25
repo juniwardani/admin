@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekap Artikel - PCNU Kotabaru</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<style>
+    .rekap-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .rekap-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .rekap-title {
+        color: var(--primary-color);
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .add-btn {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .add-btn:hover {
+        background: #006c31;
+        transform: translateY(-2px);
+    }
+
+    .article-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .article-table th,
+    .article-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    .article-table th {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 500;
+    }
+
+    .article-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .article-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .edit-btn,
+    .delete-btn {
+        padding: 0.5rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .edit-btn {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .delete-btn {
+        background: #ffebee;
+        color: #d32f2f;
+    }
+
+    .edit-btn:hover {
+        background: #bbdefb;
+    }
+
+    .delete-btn:hover {
+        background: #ffcdd2;
+    }
+
+    /* Modal Edit */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        overflow-y: auto;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .modal-content {
+        position: relative;
+        background: white;
+        width: 90%;
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .modal-title {
+        color: var(--primary-color);
+        margin: 0;
+        font-size: 1.8rem;
+        word-wrap: break-word;
+        max-width: 80%;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+        padding: 0.5rem;
+        transition: color 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    textarea.form-control {
+        min-height: 200px;
+        resize: vertical;
+    }
+
+    .save-btn {
+        background: var(--primary-color);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .save-btn:hover {
+        background: #006c31;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .alert-success {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .alert-error {
+        background: #ffebee;
+        color: #c62828;
+    }
+
+    @media (max-width: 768px) {
+        .article-table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .rekap-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .modal {
+            padding: 10px;
+        }
+
+        .modal-content {
+            width: 95%;
+            margin: 10px auto;
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            max-width: 70%;
+        }
+
+        .form-control {
+            font-size: 0.95rem;
+        }
+
+        textarea.form-control {
+            min-height: 150px;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .modal-content {
+            width: 100%;
+            margin: 5px auto;
+            padding: 1rem;
+            border-radius: 10px;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            max-width: 65%;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-control {
+            font-size: 0.9rem;
+            padding: 0.6rem;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+        }
+
+        .close-btn {
+            font-size: 1.3rem;
+            padding: 0.3rem;
+        }
+    }
+</style>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="img/logo.jpg" alt="Logo NU">
+                <h1>PCNU Kotabaru</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="https://pcnukotabaru.vercel.app">Web PCNU Kotabaru</a></li>
+                <li><a href="index.html">Tulis Artikel</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page-content">
+        <div class="rekap-container">
+            <div class="rekap-header">
+                <h1 class="rekap-title">Rekap Artikel Dakwah</h1>
+                <a href="tulis.html" class="add-btn">
+                    <i class="fas fa-plus"></i> Tambah Artikel
+                </a>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <table class="article-table">
+                <thead>
+                    <tr>
+                        <th>Judul</th>
+                        <th>Penulis</th>
+                        <th>Kategori</th>
+                        <th>Tanggal</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="articleTableBody">
+                    <!-- Data akan diisi melalui JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Modal Edit -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Artikel</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editJudul">Judul Artikel</label>
+                    <input type="text" id="editJudul" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPenulis">Nama Penulis</label>
+                    <input type="text" id="editPenulis" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editKategori">Kategori</label>
+                    <select id="editKategori" class="form-control" required>
+                        <option value="Fiqih">Fiqih</option>
+                        <option value="Aqidah">Aqidah</option>
+                        <option value="Tasawuf">Tasawuf</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editKonten">Konten Artikel</label>
+                    <textarea id="editKonten" class="form-control" required></textarea>
+                </div>
+                <button type="submit" class="save-btn">Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>PCNU Kotabaru</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Alamat: Jl. Mega Indah RT. 07 Ds. Semayap, Komplek Pendidikan Darul Ulum Kotabaru</p>
+                <p><i class="fas fa-envelope"></i> Email: kotabaru@nu.or.id</p>
+                <p><i class="fas fa-phone"></i> Telp: (+62) 812-5656-8899, (+62) 821-5175-8303</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>Media Sosial</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 PCNU Kotabaru. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Inisialisasi Supabase client
+        const supabaseUrl = 'https://iwnwqcxigtywetgcmlou.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3bndxY3hpZ3R5d2V0Z2NtbG91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU4MjQ4MTUsImV4cCI6MjA1MTQwMDgxNX0.fjdJlTVav4Gm8ku9rBmRuLoae5ViFxas7Uu069ItfnY'
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+        // Hamburger Menu
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        });
+
+        // Menutup menu saat mengklik di luar
+        document.addEventListener('click', (e) => {
+            if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('active');
+            }
+        });
+
+        // Format tanggal
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' }
+            return new Date(dateString).toLocaleDateString('id-ID', options)
+        }
+
+        // Load data artikel
+        async function loadArticles() {
+            try {
+                const { data, error } = await supabase
+                    .from('dakwah')
+                    .select('*')
+                    .order('tanggal', { ascending: false })
+
+                if (error) throw error
+
+                const tableBody = document.getElementById('articleTableBody')
+                tableBody.innerHTML = ''
+
+                data.forEach(article => {
+                    const row = `
+                        <tr>
+                            <td>${article.judul}</td>
+                            <td>${article.penulis}</td>
+                            <td>${article.kategori}</td>
+                            <td>${formatDate(article.tanggal)}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="edit-btn" onclick="editArticle('${article.id}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="delete-btn" onclick="deleteArticle('${article.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `
+                    tableBody.innerHTML += row
+                })
+
+            } catch (error) {
+                showAlert('error', 'Terjadi kesalahan: ' + error.message)
+            }
+        }
+
+        // Edit artikel
+        async function editArticle(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('dakwah')
+                    .select('*')
+                    .eq('id', id)
+                    .single()
+
+                if (error) throw error
+
+                // Isi form edit
+                document.getElementById('editId').value = data.id
+                document.getElementById('editJudul').value = data.judul
+                document.getElementById('editPenulis').value = data.penulis
+                document.getElementById('editKategori').value = data.kategori
+                document.getElementById('editKonten').value = data.konten
+
+                // Tampilkan modal
+                document.getElementById('editModal').style.display = 'block'
+
+            } catch (error) {
+                showAlert('error', 'Terjadi kesalahan: ' + error.message)
+            }
+        }
+
+        // Delete artikel
+        async function deleteArticle(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus artikel ini?')) {
+                try {
+                    const { error } = await supabase
+                        .from('dakwah')
+                        .delete()
+                        .eq('id', id)
+
+                    if (error) throw error
+
+                    showAlert('success', 'Artikel berhasil dihapus')
+                    loadArticles()
+
+                } catch (error) {
+                    showAlert('error', 'Terjadi kesalahan: ' + error.message)
+                }
+            }
+        }
+
+        // Handle form edit
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault()
+
+            const id = document.getElementById('editId').value
+            const judul = document.getElementById('editJudul').value
+            const penulis = document.getElementById('editPenulis').value
+            const kategori = document.getElementById('editKategori').value
+            const konten = document.getElementById('editKonten').value
+
+            try {
+                const { error } = await supabase
+                    .from('dakwah')
+                    .update({
+                        judul,
+                        penulis,
+                        kategori,
+                        konten
+                    })
+                    .eq('id', id)
+
+                if (error) throw error
+
+                showAlert('success', 'Artikel berhasil diperbarui')
+                document.getElementById('editModal').style.display = 'none'
+                loadArticles()
+
+            } catch (error) {
+                showAlert('error', 'Terjadi kesalahan: ' + error.message)
+            }
+        })
+
+        // Close modal
+        document.querySelector('.close-btn').addEventListener('click', () => {
+            document.getElementById('editModal').style.display = 'none'
+        })
+
+        // Show alert
+        function showAlert(type, message) {
+            const alert = document.getElementById('alert')
+            alert.className = `alert alert-${type}`
+            alert.style.display = 'block'
+            alert.textContent = message
+
+            setTimeout(() => {
+                alert.style.display = 'none'
+            }, 3000)
+        }
+
+        // Load articles when page loads
+        document.addEventListener('DOMContentLoaded', loadArticles)
+    </script>
+</body>
+</html> 
