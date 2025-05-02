@@ -3,85 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tulis Dakwah - PCNU Kotabaru</title>
+    <title>PCNU Kotabaru - Admin Panel</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <style>
-    .tulis-container {
-        max-width: 800px;
-        margin: 2rem auto;
+    .hero-container {
+        max-width: 1200px;
+        margin: 4rem auto;
         padding: 2rem;
-        background: #fff;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        text-align: center;
     }
 
-    .form-group {
-        margin-bottom: 1.5rem;
+    .hero-title {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
     }
 
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
+    .hero-subtitle {
         color: var(--text-color);
-        font-weight: 500;
+        font-size: 1.2rem;
+        margin-bottom: 3rem;
     }
 
-    .form-control {
-        width: 100%;
-        padding: 0.8rem;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: border-color 0.3s ease;
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
     }
 
-    .form-control:focus {
-        border-color: var(--primary-color);
-        outline: none;
-    }
-
-    textarea.form-control {
-        min-height: 200px;
-        resize: vertical;
-    }
-
-    .submit-btn {
-        background: var(--primary-color);
-        color: white;
-        padding: 1rem 2rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
+    .menu-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
     }
 
-    .submit-btn:hover {
+    .menu-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .menu-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .menu-title {
+        font-size: 1.5rem;
+        color: var(--text-color);
+        margin-bottom: 1rem;
+    }
+
+    .menu-description {
+        color: #666;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .menu-btn {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .menu-btn:hover {
         background: #006c31;
         transform: translateY(-2px);
     }
 
-    .alert {
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        display: none;
-    }
+    @media (max-width: 768px) {
+        .hero-container {
+            margin: 2rem auto;
+            padding: 1rem;
+        }
 
-    .alert-success {
-        background: #e8f5e9;
-        color: #2e7d32;
-        border: 1px solid #a5d6a7;
-    }
+        .hero-title {
+            font-size: 2rem;
+        }
 
-    .alert-error {
-        background: #ffebee;
-        color: #c62828;
-        border: 1px solid #ef9a9a;
+        .hero-subtitle {
+            font-size: 1rem;
+        }
+
+        .menu-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .menu-card {
+            padding: 1.5rem;
+        }
+
+        .menu-icon {
+            font-size: 2.5rem;
+        }
     }
 </style>
 <body>
@@ -93,7 +118,6 @@
             </div>
             <ul class="nav-links">
                 <li><a href="https://pcnukotabaru.vercel.app">Web PCNU Kotabaru</a></li>
-                <li><a href="rekap.html">Rekap Artikel</a></li>
             </ul>
             <div class="hamburger">
                 <span></span>
@@ -104,40 +128,29 @@
     </header>
 
     <main class="page-content">
-        <div class="tulis-container">
-            <h1>Tulis Artikel Dakwah</h1>
-            <div id="alert" class="alert"></div>
-            
-            <form id="dakwahForm">
-                <div class="form-group">
-                    <label for="judul">Judul Artikel</label>
-                    <input type="text" id="judul" class="form-control" required>
+        <div class="hero-container">
+            <h1 class="hero-title">Selamat Datang di Admin Panel</h1>
+            <p class="hero-subtitle">Pilih menu di bawah ini untuk mengelola konten website</p>
+
+            <div class="menu-grid">
+                <div class="menu-card">
+                    <i class="fas fa-pen-fancy menu-icon"></i>
+                    <h2 class="menu-title">Tulis Artikel Dakwah</h2>
+                    <p class="menu-description">Buat dan kelola artikel dakwah untuk website PCNU Kotabaru</p>
+                    <a href="artikel.html" class="menu-btn">
+                        <i class="fas fa-arrow-right"></i> Mulai Menulis
+                    </a>
                 </div>
 
-                <div class="form-group">
-                    <label for="penulis">Nama Penulis</label>
-                    <input type="text" id="penulis" class="form-control" required>
+                <div class="menu-card">
+                    <i class="fas fa-newspaper menu-icon"></i>
+                    <h2 class="menu-title">Tulis Berita</h2>
+                    <p class="menu-description">Buat dan kelola berita kegiatan dan pengumuman PCNU Kotabaru</p>
+                    <a href="input.html" class="menu-btn">
+                        <i class="fas fa-arrow-right"></i> Mulai Menulis
+                    </a>
                 </div>
-
-                <div class="form-group">
-                    <label for="kategori">Kategori</label>
-                    <select id="kategori" class="form-control" required>
-                        <option value="">Pilih Kategori</option>
-                        <option value="Fiqih">Fiqih</option>
-                        <option value="Aqidah">Aqidah</option>
-                        <option value="Tasawuf">Tasawuf</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="konten">Konten Artikel</label>
-                    <textarea id="konten" class="form-control" required></textarea>
-                </div>
-
-                <button type="submit" class="submit-btn">
-                    <i class="fas fa-paper-plane"></i> Kirim Artikel
-                </button>
-            </form>
+            </div>
         </div>
     </main>
 
@@ -166,11 +179,6 @@
     </footer>
 
     <script>
-        // Inisialisasi Supabase client
-        const supabaseUrl = 'https://iwnwqcxigtywetgcmlou.supabase.co'
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3bndxY3hpZ3R5d2V0Z2NtbG91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU4MjQ4MTUsImV4cCI6MjA1MTQwMDgxNX0.fjdJlTVav4Gm8ku9rBmRuLoae5ViFxas7Uu069ItfnY'
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
-
         // Hamburger Menu
         const hamburger = document.querySelector('.hamburger');
         const navLinks = document.querySelector('.nav-links');
@@ -187,49 +195,6 @@
                 hamburger.classList.remove('active');
             }
         });
-
-        // Menangani submit form
-        document.getElementById('dakwahForm').addEventListener('submit', async (e) => {
-            e.preventDefault()
-
-            const judul = document.getElementById('judul').value
-            const penulis = document.getElementById('penulis').value
-            const kategori = document.getElementById('kategori').value
-            const konten = document.getElementById('konten').value
-            const tanggal = new Date().toISOString()
-
-            try {
-                const { data, error } = await supabase
-                    .from('dakwah')
-                    .insert([
-                        {
-                            judul,
-                            penulis,
-                            kategori,
-                            konten,
-                            tanggal
-                        }
-                    ])
-
-                if (error) throw error
-
-                // Tampilkan pesan sukses
-                const alert = document.getElementById('alert')
-                alert.className = 'alert alert-success'
-                alert.style.display = 'block'
-                alert.textContent = 'Artikel berhasil disimpan!'
-                
-                // Reset form
-                document.getElementById('dakwahForm').reset()
-
-            } catch (error) {
-                // Tampilkan pesan error
-                const alert = document.getElementById('alert')
-                alert.className = 'alert alert-error'
-                alert.style.display = 'block'
-                alert.textContent = 'Terjadi kesalahan: ' + error.message
-            }
-        })
     </script>
 </body>
 </html> 

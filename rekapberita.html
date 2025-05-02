@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekap Artikel - PCNU Kotabaru</title>
+    <title>Rekap Berita - PCNU Kotabaru</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -304,7 +304,7 @@
             </div>
             <ul class="nav-links">
                 <li><a href="https://pcnukotabaru.vercel.app">Web PCNU Kotabaru</a></li>
-                <li><a href="artikel.html">Tulis Artikel</a></li>
+                <li><a href="input.html">Input Berita</a></li>
             </ul>
             <div class="hamburger">
                 <span></span>
@@ -317,9 +317,9 @@
     <main class="page-content">
         <div class="rekap-container">
             <div class="rekap-header">
-                <h1 class="rekap-title">Rekap Artikel Dakwah</h1>
-                <a href="artikel.html" class="add-btn">
-                    <i class="fas fa-plus"></i> Tambah Artikel
+                <h1 class="rekap-title">Rekap Berita</h1>
+                <a href="input.html" class="add-btn">
+                    <i class="fas fa-plus"></i> Tambah Berita
                 </a>
             </div>
 
@@ -346,13 +346,13 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Edit Artikel</h2>
+                <h2 class="modal-title">Edit Berita</h2>
                 <button class="close-btn">&times;</button>
             </div>
             <form id="editForm">
                 <input type="hidden" id="editId">
                 <div class="form-group">
-                    <label for="editJudul">Judul Artikel</label>
+                    <label for="editJudul">Judul Berita</label>
                     <input type="text" id="editJudul" class="form-control" required>
                 </div>
                 <div class="form-group">
@@ -362,13 +362,17 @@
                 <div class="form-group">
                     <label for="editKategori">Kategori</label>
                     <select id="editKategori" class="form-control" required>
-                        <option value="Fiqih">Fiqih</option>
-                        <option value="Aqidah">Aqidah</option>
-                        <option value="Tasawuf">Tasawuf</option>
+                        <option value="Kegiatan">Kegiatan</option>
+                        <option value="Pengumuman">Pengumuman</option>
+                        <option value="Artikel">Artikel</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="editKonten">Konten Artikel</label>
+                    <label for="editGambar">URL Gambar</label>
+                    <input type="text" id="editGambar" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="editKonten">Konten Berita</label>
                     <textarea id="editKonten" class="form-control" required></textarea>
                 </div>
                 <button type="submit" class="save-btn">Simpan Perubahan</button>
@@ -429,11 +433,11 @@
             return new Date(dateString).toLocaleDateString('id-ID', options)
         }
 
-        // Load data artikel
+        // Load data berita
         async function loadArticles() {
             try {
                 const { data, error } = await supabase
-                    .from('dakwah')
+                    .from('berita')
                     .select('*')
                     .order('tanggal', { ascending: false })
 
@@ -469,11 +473,11 @@
             }
         }
 
-        // Edit artikel
+        // Edit berita
         async function editArticle(id) {
             try {
                 const { data, error } = await supabase
-                    .from('dakwah')
+                    .from('berita')
                     .select('*')
                     .eq('id', id)
                     .single()
@@ -485,6 +489,7 @@
                 document.getElementById('editJudul').value = data.judul
                 document.getElementById('editPenulis').value = data.penulis
                 document.getElementById('editKategori').value = data.kategori
+                document.getElementById('editGambar').value = data.gambar_url || ''
                 document.getElementById('editKonten').value = data.konten
 
                 // Tampilkan modal
@@ -495,18 +500,18 @@
             }
         }
 
-        // Delete artikel
+        // Delete berita
         async function deleteArticle(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus artikel ini?')) {
+            if (confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
                 try {
                     const { error } = await supabase
-                        .from('dakwah')
+                        .from('berita')
                         .delete()
                         .eq('id', id)
 
                     if (error) throw error
 
-                    showAlert('success', 'Artikel berhasil dihapus')
+                    showAlert('success', 'Berita berhasil dihapus')
                     loadArticles()
 
                 } catch (error) {
@@ -523,22 +528,24 @@
             const judul = document.getElementById('editJudul').value
             const penulis = document.getElementById('editPenulis').value
             const kategori = document.getElementById('editKategori').value
+            const gambar_url = document.getElementById('editGambar').value
             const konten = document.getElementById('editKonten').value
 
             try {
                 const { error } = await supabase
-                    .from('dakwah')
+                    .from('berita')
                     .update({
                         judul,
                         penulis,
                         kategori,
+                        gambar_url,
                         konten
                     })
                     .eq('id', id)
 
                 if (error) throw error
 
-                showAlert('success', 'Artikel berhasil diperbarui')
+                showAlert('success', 'Berita berhasil diperbarui')
                 document.getElementById('editModal').style.display = 'none'
                 loadArticles()
 

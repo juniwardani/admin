@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Berita - PCNU Kotabaru</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<style>
+    .input-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+
+    textarea.form-control {
+        min-height: 200px;
+        resize: vertical;
+    }
+
+    .submit-btn {
+        background: var(--primary-color);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background: #006c31;
+        transform: translateY(-2px);
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .alert-success {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #a5d6a7;
+    }
+
+    .alert-error {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
+    }
+
+    .image-preview {
+        max-width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-top: 1rem;
+        display: none;
+    }
+</style>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="img/logo.jpg" alt="Logo NU">
+                <h1>PCNU Kotabaru</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="https://pcnukotabaru.vercel.app">Web PCNU Kotabaru</a></li>
+                <li><a href="rekapberita.html">Daftar Berita</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page-content">
+        <div class="input-container">
+            <h1>Input Berita Baru</h1>
+            <div id="alert" class="alert"></div>
+            
+            <form id="beritaForm">
+                <div class="form-group">
+                    <label for="judul">Judul Berita</label>
+                    <input type="text" id="judul" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="penulis">Nama Penulis</label>
+                    <input type="text" id="penulis" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="kategori">Kategori</label>
+                    <select id="kategori" class="form-control" required>
+                        <option value="">Pilih Kategori</option>
+                        <option value="Kegiatan">Kegiatan</option>
+                        <option value="Pengumuman">Pengumuman</option>
+                        <option value="Artikel">Artikel</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="gambar">URL Gambar Berita (Opsional)</label>
+                    <input type="text" id="gambar" class="form-control" placeholder="Masukkan URL gambar">
+                    <img id="imagePreview" class="image-preview" alt="Preview gambar">
+                </div>
+
+                <div class="form-group">
+                    <label for="konten">Konten Berita</label>
+                    <textarea id="konten" class="form-control" required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Kirim Berita
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>PCNU Kotabaru</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Alamat: Jl. Mega Indah RT. 07 Ds. Semayap, Komplek Pendidikan Darul Ulum Kotabaru</p>
+                <p><i class="fas fa-envelope"></i> Email: kotabaru@nu.or.id</p>
+                <p><i class="fas fa-phone"></i> Telp: (+62) 812-5656-8899, (+62) 821-5175-8303</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>Media Sosial</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 PCNU Kotabaru. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Inisialisasi Supabase client
+        const supabaseUrl = 'https://iwnwqcxigtywetgcmlou.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3bndxY3hpZ3R5d2V0Z2NtbG91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU4MjQ4MTUsImV4cCI6MjA1MTQwMDgxNX0.fjdJlTVav4Gm8ku9rBmRuLoae5ViFxas7Uu069ItfnY'
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+        // Hamburger Menu
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        });
+
+        // Menutup menu saat mengklik di luar
+        document.addEventListener('click', (e) => {
+            if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('active');
+            }
+        });
+
+        // Preview gambar
+        const imageInput = document.getElementById('gambar');
+        const imagePreview = document.getElementById('imagePreview');
+
+        imageInput.addEventListener('input', (e) => {
+            const imageUrl = e.target.value;
+            if (imageUrl) {
+                imagePreview.src = imageUrl;
+                imagePreview.style.display = 'block';
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+
+        // Menangani submit form
+        document.getElementById('beritaForm').addEventListener('submit', async (e) => {
+            e.preventDefault()
+
+            const judul = document.getElementById('judul').value
+            const penulis = document.getElementById('penulis').value
+            const kategori = document.getElementById('kategori').value
+            const konten = document.getElementById('konten').value
+            const tanggal = new Date().toISOString()
+            const gambar_url = document.getElementById('gambar').value
+
+            try {
+                // Simpan data berita
+                const { data, error } = await supabase
+                    .from('berita')
+                    .insert([
+                        {
+                            judul,
+                            penulis,
+                            kategori,
+                            konten,
+                            tanggal,
+                            gambar_url
+                        }
+                    ])
+
+                if (error) throw error
+
+                // Tampilkan pesan sukses
+                const alert = document.getElementById('alert')
+                alert.className = 'alert alert-success'
+                alert.style.display = 'block'
+                alert.textContent = 'Berita berhasil disimpan!'
+                
+                // Reset form
+                document.getElementById('beritaForm').reset()
+                imagePreview.style.display = 'none'
+
+            } catch (error) {
+                // Tampilkan pesan error
+                const alert = document.getElementById('alert')
+                alert.className = 'alert alert-error'
+                alert.style.display = 'block'
+                alert.textContent = 'Terjadi kesalahan: ' + error.message
+            }
+        })
+    </script>
+</body>
+</html> 
