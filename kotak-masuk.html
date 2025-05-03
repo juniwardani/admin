@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotak Masuk Pesan - PCNU Kotabaru</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<style>
+    .messages-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .message-card {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        background: #f9f9f9;
+        border-left: 4px solid var(--primary-color);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .message-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+    }
+
+    .sender-info h3 {
+        margin: 0;
+        color: var(--primary-color);
+    }
+
+    .sender-email {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .message-date {
+        color: #888;
+        font-size: 0.85rem;
+    }
+
+    .message-content {
+        line-height: 1.6;
+    }
+
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+    }
+
+    .loading-spinner i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .no-messages {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .pagination button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        margin: 0 0.5rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .pagination button:hover {
+        background: #006c31;
+    }
+
+    .pagination button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .page-info {
+        margin: 0 1rem;
+        line-height: 2.5;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 2rem;
+        border-radius: 15px;
+        width: 80%;
+        max-width: 700px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        position: relative;
+        animation: modalFadeIn 0.3s;
+    }
+
+    @keyframes modalFadeIn {
+        from {opacity: 0; transform: translateY(-50px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        color: #aaa;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .close-modal:hover {
+        color: var(--primary-color);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        color: var(--primary-color);
+    }
+
+    .modal-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        color: #666;
+    }
+
+    .modal-body {
+        line-height: 1.8;
+    }
+</style>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="img/logo.jpg" alt="Logo NU">
+                <h1>PCNU Kotabaru</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="https://pcnukotabaru.vercel.app">Web PCNU Kotabaru</a></li>
+                <li><a href="rekapberita.html">Daftar Berita</a></li>
+                <li><a href="input.html">Input Berita</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page-content">
+        <div class="messages-container">
+            <h1>Kotak Masuk Pesan</h1>
+            
+            <div id="loading" class="loading-spinner">
+                <i class="fas fa-spinner"></i>
+            </div>
+            
+            <div id="messagesList"></div>
+            
+            <div id="pagination" class="pagination">
+                <button id="prevPage" disabled><i class="fas fa-chevron-left"></i> Sebelumnya</button>
+                <span class="page-info" id="pageInfo">Halaman 1</span>
+                <button id="nextPage"><i class="fas fa-chevron-right"></i> Selanjutnya</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal untuk menampilkan detail pesan -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-header">
+                <h2 id="modalName"></h2>
+            </div>
+            <div class="modal-info">
+                <span id="modalEmail"></span>
+                <span id="modalDate"></span>
+            </div>
+            <div class="modal-body" id="modalMessage"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>PCNU Kotabaru</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Alamat: Jl. Mega Indah RT. 07 Ds. Semayap, Komplek Pendidikan Darul Ulum Kotabaru</p>
+                <p><i class="fas fa-envelope"></i> Email: kotabaru@nu.or.id</p>
+                <p><i class="fas fa-phone"></i> Telp: (+62) 812-5656-8899, (+62) 821-5175-8303</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>Media Sosial</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 PCNU Kotabaru. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Inisialisasi Supabase client
+        const supabaseUrl = 'https://iwnwqcxigtywetgcmlou.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3bndxY3hpZ3R5d2V0Z2NtbG91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU4MjQ4MTUsImV4cCI6MjA1MTQwMDgxNX0.fjdJlTVav4Gm8ku9rBmRuLoae5ViFxas7Uu069ItfnY'
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+
+        // Hamburger Menu
+        const hamburger = document.querySelector('.hamburger');
+        const navLinks = document.querySelector('.nav-links');
+
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        });
+
+        // Menutup menu saat mengklik di luar
+        document.addEventListener('click', (e) => {
+            if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+                navLinks.classList.remove('active');
+                hamburger.classList.remove('active');
+            }
+        });
+
+        // Variabel untuk pagination
+        let currentPage = 1;
+        const messagesPerPage = 10;
+        let totalMessages = 0;
+
+        // Format tanggal ke format Indonesia
+        function formatDate(dateString) {
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        // Fungsi untuk menampilkan modal
+        function openModal(message) {
+            const modal = document.getElementById('messageModal');
+            const modalName = document.getElementById('modalName');
+            const modalEmail = document.getElementById('modalEmail');
+            const modalDate = document.getElementById('modalDate');
+            const modalMessage = document.getElementById('modalMessage');
+            
+            modalName.textContent = message.name || 'Tanpa Nama';
+            modalEmail.textContent = message.email || 'Tanpa Email';
+            modalDate.textContent = formatDate(message.created_at);
+            modalMessage.textContent = message.message || 'Tanpa Pesan';
+            
+            modal.style.display = 'block';
+            
+            // Menutup modal saat mengklik tombol close
+            document.querySelector('.close-modal').onclick = function() {
+                modal.style.display = 'none';
+            }
+            
+            // Menutup modal saat mengklik di luar modal
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+
+        // Fungsi untuk memuat pesan
+        async function loadMessages(page = 1) {
+            const messagesList = document.getElementById('messagesList');
+            const loading = document.getElementById('loading');
+            const prevPageBtn = document.getElementById('prevPage');
+            const nextPageBtn = document.getElementById('nextPage');
+            const pageInfo = document.getElementById('pageInfo');
+            
+            loading.style.display = 'flex';
+            messagesList.innerHTML = '';
+            
+            try {
+                console.log('Memulai pengambilan data pesan...');
+                
+                // Hitung offset berdasarkan halaman
+                const offset = (page - 1) * messagesPerPage;
+                
+                // Ambil jumlah total pesan
+                const countResult = await supabase
+                    .from('messages')
+                    .select('*', { count: 'exact', head: true });
+                
+                console.log('Hasil count:', countResult);
+                
+                if (countResult.error) {
+                    console.error('Error saat menghitung pesan:', countResult.error);
+                    throw countResult.error;
+                }
+                
+                totalMessages = countResult.count;
+                console.log('Total pesan:', totalMessages);
+                
+                // Ambil pesan dengan pagination
+                const result = await supabase
+                    .from('messages')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .range(offset, offset + messagesPerPage - 1);
+                
+                console.log('Hasil query pesan:', result);
+                
+                if (result.error) {
+                    console.error('Error saat mengambil pesan:', result.error);
+                    throw result.error;
+                }
+                
+                const data = result.data;
+                
+                loading.style.display = 'none';
+                
+                if (!data || data.length === 0) {
+                    console.log('Tidak ada pesan yang ditemukan');
+                    messagesList.innerHTML = '<div class="no-messages">Tidak ada pesan yang ditemukan.</div>';
+                    return;
+                }
+                
+                console.log(`Menampilkan ${data.length} pesan`);
+                
+                // Tampilkan pesan (hanya nama dan tanggal)
+                data.forEach(message => {
+                    console.log('Memproses pesan:', message);
+                    const messageCard = document.createElement('div');
+                    messageCard.className = 'message-card';
+                    
+                    messageCard.innerHTML = `
+                        <div class="message-header">
+                            <div class="sender-info">
+                                <h3>${message.name || 'Tanpa Nama'}</h3>
+                            </div>
+                            <div class="message-date">${formatDate(message.created_at)}</div>
+                        </div>
+                    `;
+                    
+                    // Tambahkan event listener untuk membuka modal
+                    messageCard.addEventListener('click', () => {
+                        openModal(message);
+                    });
+                    
+                    messagesList.appendChild(messageCard);
+                });
+                
+                // Update pagination
+                const totalPages = Math.ceil(totalMessages / messagesPerPage);
+                prevPageBtn.disabled = page <= 1;
+                nextPageBtn.disabled = page >= totalPages;
+                pageInfo.textContent = `Halaman ${page} dari ${totalPages || 1}`;
+                
+            } catch (error) {
+                console.error('Error dalam loadMessages:', error);
+                loading.style.display = 'none';
+                messagesList.innerHTML = `
+                    <div class="no-messages">
+                        <p>Terjadi kesalahan: ${error.message}</p>
+                        <p>Detail: ${JSON.stringify(error)}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Event listener untuk tombol pagination
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadMessages(currentPage);
+            }
+        });
+        
+        document.getElementById('nextPage').addEventListener('click', () => {
+            const totalPages = Math.ceil(totalMessages / messagesPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadMessages(currentPage);
+            }
+        });
+        
+        // Muat pesan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMessages();
+        });
+    </script>
+</body>
+</html>
