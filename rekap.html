@@ -339,6 +339,15 @@
                     <!-- Data akan diisi melalui JavaScript -->
                 </tbody>
             </table>
+            <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: center; gap: 0.5rem;">
+                <button id="prevPage" class="pagination-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-chevron-left"></i> Sebelumnya
+                </button>
+                <div id="pageNumbers" style="display: flex; gap: 0.5rem; align-items: center;"></div>
+                <button id="nextPage" class="pagination-btn" style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Selanjutnya <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
         </div>
     </main>
 
@@ -402,6 +411,12 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3bndxY3hpZ3R5d2V0Z2NtbG91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU4MjQ4MTUsImV4cCI6MjA1MTQwMDgxNX0.fjdJlTVav4Gm8ku9rBmRuLoae5ViFxas7Uu069ItfnY'
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
 
+        // Variabel pagination
+        let currentPage = 1;
+        const itemsPerPage = 6;
+        let totalItems = 0;
+        let totalPages = 0;
+
         // Hamburger Menu
         const hamburger = document.querySelector('.hamburger');
         const navLinks = document.querySelector('.nav-links');
@@ -428,10 +443,25 @@
         // Load data artikel
         async function loadArticles() {
             try {
+                // Hitung total items
+                const { count, error: countError } = await supabase
+                    .from('dakwah')
+                    .select('*', { count: 'exact', head: true })
+
+                if (countError) throw countError
+
+                totalItems = count
+                totalPages = Math.ceil(totalItems / itemsPerPage)
+
+                // Hitung offset
+                const from = (currentPage - 1) * itemsPerPage
+                const to = from + itemsPerPage - 1
+
                 const { data, error } = await supabase
                     .from('dakwah')
                     .select('*')
                     .order('tanggal', { ascending: false })
+                    .range(from, to)
 
                 if (error) throw error
 
@@ -460,10 +490,64 @@
                     tableBody.innerHTML += row
                 })
 
+                // Update pagination
+                updatePagination()
+
             } catch (error) {
                 showAlert('error', 'Terjadi kesalahan: ' + error.message)
             }
         }
+
+        // Update pagination buttons
+        function updatePagination() {
+            const pageNumbers = document.getElementById('pageNumbers')
+            pageNumbers.innerHTML = ''
+
+            // Tampilkan maksimal 5 nomor halaman
+            let startPage = Math.max(1, currentPage - 2)
+            let endPage = Math.min(totalPages, startPage + 4)
+
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4)
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button')
+                pageButton.textContent = i
+                pageButton.style.padding = '0.5rem 1rem'
+                pageButton.style.border = 'none'
+                pageButton.style.borderRadius = '5px'
+                pageButton.style.cursor = 'pointer'
+                pageButton.style.backgroundColor = i === currentPage ? 'var(--primary-color)' : '#e0e0e0'
+                pageButton.style.color = i === currentPage ? 'white' : 'black'
+
+                pageButton.addEventListener('click', () => {
+                    currentPage = i
+                    loadArticles()
+                })
+
+                pageNumbers.appendChild(pageButton)
+            }
+
+            // Update prev/next buttons
+            document.getElementById('prevPage').disabled = currentPage === 1
+            document.getElementById('nextPage').disabled = currentPage === totalPages
+        }
+
+        // Event listeners untuk tombol prev/next
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--
+                loadArticles()
+            }
+        })
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++
+                loadArticles()
+            }
+        })
 
         // Edit artikel
         async function editArticle(id) {
