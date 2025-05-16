@@ -93,6 +93,14 @@
           
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
+              Link Bukti Kegiatan
+            </label>
+            <input type="url" id="link" name="link" placeholder="https://example.com/bukti-kegiatan"
+              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
               Kehadiran dan Tempat Kegiatan
             </label>
             <div class="editor-toolbar mb-2 p-2 bg-gray-50 rounded-t-lg border border-gray-300">
@@ -180,6 +188,10 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Kegiatan</label>
               <input type="text" id="editKegiatan" class="w-full px-4 py-2 border border-gray-300 rounded-md">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Link Bukti Kegiatan</label>
+              <input type="url" id="editLink" placeholder="https://example.com/bukti-kegiatan" class="w-full px-4 py-2 border border-gray-300 rounded-md">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Kehadiran & Tempat</label>
@@ -275,7 +287,8 @@
       const formData = {
         hari_tanggal: document.getElementById('tanggal').value,
         kegiatan: document.getElementById('kegiatan').value,
-        kehadiran_tempat: kehadiranTempat
+        kehadiran_tempat: kehadiranTempat,
+        link: document.getElementById('link').value
       };
 
       try {
@@ -335,6 +348,7 @@
             <td class="px-6 py-4">${item.kegiatan}</td>
             <td class="px-6 py-4">${item.kehadiran_tempat}</td>
             <td class="px-6 py-4 whitespace-nowrap">
+              ${item.link ? `<a href="${item.link}" target="_blank" class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-link"></i></a>` : ''}
               <button onclick="editJurnal(${item.id})" class="text-blue-600 hover:text-blue-900 mr-3">
                 <i class="fas fa-edit"></i>
               </button>
@@ -376,6 +390,7 @@
         document.getElementById('editId').value = id;
         document.getElementById('editTanggal').value = data.hari_tanggal;
         document.getElementById('editKegiatan').value = data.kegiatan;
+        document.getElementById('editLink').value = data.link || '';
         document.getElementById('editKehadiranEditor').innerHTML = data.kehadiran_tempat;
 
         document.getElementById('editModal').classList.remove('hidden');
@@ -400,7 +415,8 @@
       const formData = {
         hari_tanggal: document.getElementById('editTanggal').value,
         kegiatan: document.getElementById('editKegiatan').value,
-        kehadiran_tempat: kehadiranTempat
+        kehadiran_tempat: kehadiranTempat,
+        link: document.getElementById('editLink').value
       };
 
       try {
